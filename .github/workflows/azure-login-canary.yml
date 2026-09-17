@@ -11,6 +11,11 @@ permissions:
 jobs: 
   az-login-test:
     runs-on: ubuntu-latest
+    env:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_CLIENTID: ${{ secrets.AZURE_CLIENTID }}
+      AZURE_TENANTID: ${{ secrets.AZURE_TENANTID }}
+      AZURE_SUBSCRIPTIONID: ${{ secrets.AZURE_SUBSCRIPTIONID }}
     steps:
       - name : Check Az version before installing
         run: az --version
@@ -33,38 +38,46 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         
       - name: 'Az CLI login with subscription'
+        if: ${{ env.AZURE_CREDENTIALS != '' }}
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
-      - run: |
+      - if: ${{ env.AZURE_CREDENTIALS != '' }}
+        run: |
           az account show --output none
           
       - name: 'Az CLI login without subscription'
+        if: ${{ env.AZURE_CREDENTIALS != '' }}
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           allow-no-subscriptions: true
           
-      - run: |
+      - if: ${{ env.AZURE_CREDENTIALS != '' }}
+        run: |
           az account show --output none
           
       - name: 'Az CLI login with subscription OIDC'
+        if: ${{ env.AZURE_CLIENTID != '' && env.AZURE_TENANTID != '' && env.AZURE_SUBSCRIPTIONID != '' }}
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ secrets.AZURE_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }} 
         
-      - run: |
+      - if: ${{ env.AZURE_CLIENTID != '' && env.AZURE_TENANTID != '' && env.AZURE_SUBSCRIPTIONID != '' }}
+        run: |
           az account show --output none
           
       - name: 'Az CLI login without subscription OIDC'
+        if: ${{ env.AZURE_CLIENTID != '' && env.AZURE_TENANTID != '' }}
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ secrets.AZURE_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           allow-no-subscriptions: true
           
-      - run: |
+      - if: ${{ env.AZURE_CLIENTID != '' && env.AZURE_TENANTID != '' }}
+        run: |
           az account show --output none
