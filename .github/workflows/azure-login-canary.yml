@@ -11,6 +11,8 @@ permissions:
 jobs: 
   az-login-test:
     runs-on: ubuntu-latest
+    # Azure secrets are only available in the upstream repository, not in forks
+    if: github.repository_owner == 'Azure'
     steps:
       - name : Check Az version before installing
         run: az --version
