@@ -11,6 +11,9 @@ permissions:
 jobs: 
   az-login-test:
     runs-on: ubuntu-latest
+    env:
+      HAS_CREDS: ${{ secrets.AZURE_CREDENTIALS != '' }}
+      HAS_OIDC: ${{ secrets.AZURE_CLIENTID != '' && secrets.AZURE_TENANTID != '' }}
     steps:
       - name : Check Az version before installing
         run: az --version
@@ -33,38 +36,46 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         
       - name: 'Az CLI login with subscription'
+        if: env.HAS_CREDS == 'true'
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           
-      - run: |
+      - if: env.HAS_CREDS == 'true'
+        run: |
           az account show --output none
           
       - name: 'Az CLI login without subscription'
+        if: env.HAS_CREDS == 'true'
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           allow-no-subscriptions: true
           
-      - run: |
+      - if: env.HAS_CREDS == 'true'
+        run: |
           az account show --output none
           
       - name: 'Az CLI login with subscription OIDC'
+        if: env.HAS_OIDC == 'true'
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ secrets.AZURE_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }} 
         
-      - run: |
+      - if: env.HAS_OIDC == 'true'
+        run: |
           az account show --output none
           
       - name: 'Az CLI login without subscription OIDC'
+        if: env.HAS_OIDC == 'true'
         uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{ secrets.AZURE_CLIENTID }}
           tenant-id: ${{ secrets.AZURE_TENANTID }}
           allow-no-subscriptions: true
           
-      - run: |
+      - if: env.HAS_OIDC == 'true'
+        run: |
           az account show --output none
